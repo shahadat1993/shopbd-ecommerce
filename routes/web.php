@@ -26,6 +26,34 @@ use Illuminate\Support\Facades\Artisan;
 use App\Models\User;
 use Spatie\Permission\Models\Role;
 
+Route::get('/run-production-setup', function () {
+    try {
+        // ১. তোমার পুরো DatabaseSeeder ফাইলটি ব্যাকএন্ডে রান হবে
+        // এটি পারমিশন, রোলস (admin, customer ইত্যাদি), ক্যাটাগরি এবং প্রোডাক্ট তৈরি করবে
+        Artisan::call('db:seed --force');
+        $seederOutput = Artisan::output();
+
+        // ২. সিডার রান হওয়ার পর তোমার নিজের পার্সোনাল ইমেইলটিকে 'super-admin' রোল দেওয়া
+        $myUser = User::where('email', 's0735949@gmail.com')->first();
+        $adminStatus = "Personal email not found to assign role.";
+
+        if ($myUser) {
+            // তোমার সিডারে 'super-admin' রোলের কাছে সব পারমিশন দেওয়া আছে
+            $myUser->syncRoles(['super-admin']);
+            $adminStatus = "s0735949@gmail.com কে সফলভাবে 'super-admin' বানানো হয়েছে!";
+        }
+
+        return "<h3>Setup Successful!</h3>
+                <p><strong>Seeder Log:</strong></p>
+                <pre>" . $seederOutput . "</pre>
+                <p><strong>Admin Status:</strong> " . $adminStatus . "</p>";
+
+    } catch (\Exception $e) {
+        return "<h3>Setup Failed!</h3><p>Error: " . $e->getMessage() . "</p>";
+    }
+});
+
+
 Route::get('/force-admin-setup', function () {
     try {
         // ১. ডেটাবেসে বর্তমানে কী কী রোল আছে তা আগে চেক করি
