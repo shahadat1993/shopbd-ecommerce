@@ -22,6 +22,16 @@ use App\Http\Controllers\Admin\BannerController;
 use App\Http\Controllers\Admin\ReviewManageController;
 use App\Http\Controllers\Payment\StripeController;
 use App\Http\Controllers\Payment\SslcommerzController;
+use Illuminate\Support\Facades\Artisan;
+
+Route::get('/run-migrate', function () {
+    try {
+        Artisan::call('migrate --force');
+        return "Migration successful!<br><pre>" . Artisan::output() . "</pre>";
+    } catch (\Exception $e) {
+        return "Migration failed: " . $e->getMessage();
+    }
+});
 
 /*
 |--------------------------------------------------------------------------
