@@ -8,7 +8,6 @@ use App\Models\Category;
 use App\Models\ProductImage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Storage;
 
 class ProductManageController extends Controller
 {
@@ -65,16 +64,17 @@ class ProductManageController extends Controller
         $validated['is_featured'] = $request->boolean('is_featured');
         $validated['tags']        = $request->tags ? array_map('trim', explode(',', $request->tags)) : null;
 
+        // Thumbnail Upload to Cloudinary
         if ($request->hasFile('thumbnail')) {
-            $validated['thumbnail'] = $request->file('thumbnail')->store('products', 'public');
+            $validated['thumbnail'] = cloudinary()->upload($request->file('thumbnail')->getRealPath())->getSecurePath();
         }
 
         $product = Product::create($validated);
 
-        // Handle multiple images
+        // Handle multiple images using Cloudinary
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $index => $image) {
-                $path = $image->store('products/gallery', 'public');
+                $path = cloudinary()->upload($image->getRealPath())->getSecurePath();
                 ProductImage::create([
                     'product_id' => $product->id,
                     'image'      => $path,
@@ -122,17 +122,18 @@ class ProductManageController extends Controller
         $validated['is_featured'] = $request->boolean('is_featured');
         $validated['tags']        = $request->tags ? array_map('trim', explode(',', $request->tags)) : null;
 
+        // Thumbnail Update using Cloudinary
         if ($request->hasFile('thumbnail')) {
-            if ($product->thumbnail) Storage::disk('public')->delete($product->thumbnail);
-            $validated['thumbnail'] = $request->file('thumbnail')->store('products', 'public');
+            $validated['thumbnail'] = cloudinary()->upload($request->file('thumbnail')->getRealPath())->getSecurePath();
         }
 
         $product->update($validated);
 
+        // Multiple Gallery Images Update using Cloudinary
         if ($request->hasFile('images')) {
             $existingCount = $product->images()->count();
             foreach ($request->file('images') as $index => $image) {
-                $path = $image->store('products/gallery', 'public');
+                $path = cloudinary()->upload($image->getRealPath())->getSecurePath();
                 ProductImage::create([
                     'product_id' => $product->id,
                     'image'      => $path,
@@ -148,8 +149,7 @@ class ProductManageController extends Controller
 
     public function destroy(Product $product)
     {
-        if ($product->thumbnail) Storage::disk('public')->delete($product->thumbnail);
-        foreach ($product->images as $img) Storage::disk('public')->delete($img->image);
+        // ডিলিট লজিক থেকে স্টোরেজ ডিলিট বাদ
         $product->delete();
         return redirect()->route('admin.products.index')->with('success', 'Product deleted.');
     }
@@ -162,7 +162,7 @@ class ProductManageController extends Controller
 
     public function deleteImage(ProductImage $image)
     {
-        Storage::disk('public')->delete($image->image);
+        // স্টোরেজ ডিলিট বাদ, শুধু ডেটাবেস থেকে ডিলিট
         $image->delete();
         return back()->with('success', 'Image deleted.');
     }
