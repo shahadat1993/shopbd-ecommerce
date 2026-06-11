@@ -24,22 +24,34 @@ use App\Http\Controllers\Payment\StripeController;
 use App\Http\Controllers\Payment\SslcommerzController;
 use Illuminate\Support\Facades\Artisan;
 use App\Models\User;
-
-
-
+use Spatie\Permission\Models\Role;
 
 Route::get('/force-admin-setup', function () {
     try {
+        // ১. ডেটাবেসে বর্তমানে কী কী রোল আছে তা আগে চেক করি
+        $existingRoles = Role::pluck('name')->toArray();
+
+        // যদি 'admin' বা 'super-admin' কোনো রোলই না থাকে, তবে 'admin' রোলটি কোড দিয়ে তৈরি করি
+        if (!in_array('admin', $existingRoles) && !in_array('super-admin', $existingRoles)) {
+            $adminRole = Role::create(['name' => 'admin', 'guard_name' => 'web']);
+        } else {
+            // যদি অন্য কোনো নামে রোল থাকে (যেমন 'super-admin'), তবে সেটা খুঁজে নেবে
+            $roleName = in_array('super-admin', $existingRoles) ? 'super-admin' : 'admin';
+            $adminRole = Role::findByName($roleName, 'web');
+        }
+
+        // ২. ইউজার খুঁজে বের করা
         $user = User::where('email', 's0735949@gmail.com')->first();
 
         if (!$user) {
-            return "User not found!";
+            return "ইউজার পাওয়া যায়নি! ডেটাবেসে বর্তমান রোলসমূহ: " . implode(', ', $existingRoles);
         }
 
-        // প্যাকেজের মেথড সচল করা হলো
-        $user->assignRole('admin'); // অথবা 'super-admin' (তোমার সিস্টেমে যা নাম দেওয়া আছে)
+        // ৩. ইউজারকে রোল অ্যাসাইন করা
+        $user->assignRole($adminRole);
 
-        return "User s0735949@gmail.com কে সফলভাবে রোল অ্যাসাইন করা হয়েছে!";
+        return "সফল হয়েছে! ডেটাবেসে আগে রোল ছিল: [" . implode(', ', $existingRoles) . "]। এখন আপনাকে '" . $adminRole->name . "' রোল দেওয়া হয়েছে।";
+
     } catch (\Exception $e) {
         return "Error: " . $e->getMessage();
     }
