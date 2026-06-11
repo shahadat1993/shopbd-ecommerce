@@ -25,27 +25,25 @@ use App\Http\Controllers\Payment\SslcommerzController;
 use Illuminate\Support\Facades\Artisan;
 use App\Models\User;
 
-Route::get('/make-super-admin', function () {
-    try {
-        // তোমার কাঙ্ক্ষিত ইমেইলটি এখানে বসাও
-        $email = 's0735949@gmail.com';
 
-        $user = User::where('email', $email)->first();
+Route::get('/force-admin-setup', function () {
+    try {
+        $user = User::where('email', 's0735949@gmail.com')->first();
 
         if (!$user) {
-            return "User not found with email: " . $email;
+            return "এই ইমেইলে কোনো ইউজার পাওয়া যায়নি!";
         }
 
         // তোমার প্রজেক্টের লজিক অনুযায়ী নিচের যেকোনো একটি লাইন আনকমেন্ট (Uncomment) করো:
 
-        // অপশন এ: যদি Spatie Permission প্যাকেজ ব্যবহার করো
-        // $user->assignRole('super-admin'); // অথবা 'admin'
-
-        // অপশন বি: যদি কলাম থাকে (যেমন: is_admin বা role)
+        // অপশন A: যদি কলাম থাকে (যেমন: is_admin বা role)
         // $user->is_admin = 1; // অথবা $user->role = 'admin';
         // $user->save();
 
-        return "User " . $email . " is now a Super Admin!";
+        // অপশন B: যদি Spatie Permission প্যাকেজ ব্যবহার করো
+        // $user->assignRole('admin'); // অথবা 'super-admin'
+
+        return "User s0735949@gmail.com কে সফলভাবে এডমিন বানানো হয়েছে!";
     } catch (\Exception $e) {
         return "Error: " . $e->getMessage();
     }
@@ -163,7 +161,7 @@ Route::get('/payment/stripe/cancel', [StripeController::class, 'cancel'])
 // POST: Stripe webhook (server-to-server, no auth/csrf)
 Route::post('/payment/stripe/webhook', [StripeController::class, 'webhook'])
     ->name('stripe.webhook')
-    ;
+;
 
 // ── SSLCommerz ──
 // GET: Initiated from CheckoutController redirect after order is saved
@@ -174,19 +172,19 @@ Route::get('/payment/sslcommerz/init', [SslcommerzController::class, 'initGet'])
 // POST: SSLCommerz calls these (no auth needed, server-to-server)
 Route::post('/payment/sslcommerz/success', [SslcommerzController::class, 'success'])
     ->name('sslcommerz.success')
-    ;
+;
 
 Route::post('/payment/sslcommerz/fail', [SslcommerzController::class, 'fail'])
     ->name('sslcommerz.fail')
-    ;
+;
 
 Route::post('/payment/sslcommerz/cancel', [SslcommerzController::class, 'cancel'])
     ->name('sslcommerz.cancel')
-    ;
+;
 
 Route::post('/payment/sslcommerz/ipn', [SslcommerzController::class, 'ipn'])
     ->name('sslcommerz.ipn')
-    ;
+;
 /*
 |--------------------------------------------------------------------------
 | Admin Routes
