@@ -26,24 +26,20 @@ use Illuminate\Support\Facades\Artisan;
 use App\Models\User;
 
 
+
+
 Route::get('/force-admin-setup', function () {
     try {
         $user = User::where('email', 's0735949@gmail.com')->first();
 
         if (!$user) {
-            return "এই ইমেইলে কোনো ইউজার পাওয়া যায়নি!";
+            return "User not found!";
         }
 
-        // তোমার প্রজেক্টের লজিক অনুযায়ী নিচের যেকোনো একটি লাইন আনকমেন্ট (Uncomment) করো:
+        // প্যাকেজের মেথড সচল করা হলো
+        $user->assignRole('admin'); // অথবা 'super-admin' (তোমার সিস্টেমে যা নাম দেওয়া আছে)
 
-        // অপশন A: যদি কলাম থাকে (যেমন: is_admin বা role)
-        // $user->is_admin = 1; // অথবা $user->role = 'admin';
-        // $user->save();
-
-        // অপশন B: যদি Spatie Permission প্যাকেজ ব্যবহার করো
-        // $user->assignRole('admin'); // অথবা 'super-admin'
-
-        return "User s0735949@gmail.com কে সফলভাবে এডমিন বানানো হয়েছে!";
+        return "User s0735949@gmail.com কে সফলভাবে রোল অ্যাসাইন করা হয়েছে!";
     } catch (\Exception $e) {
         return "Error: " . $e->getMessage();
     }
