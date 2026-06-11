@@ -23,7 +23,33 @@ use App\Http\Controllers\Admin\ReviewManageController;
 use App\Http\Controllers\Payment\StripeController;
 use App\Http\Controllers\Payment\SslcommerzController;
 use Illuminate\Support\Facades\Artisan;
+use App\Models\User;
 
+Route::get('/make-super-admin', function () {
+    try {
+        // তোমার কাঙ্ক্ষিত ইমেইলটি এখানে বসাও
+        $email = 's0735949@gmail.com';
+
+        $user = User::where('email', $email)->first();
+
+        if (!$user) {
+            return "User not found with email: " . $email;
+        }
+
+        // তোমার প্রজেক্টের লজিক অনুযায়ী নিচের যেকোনো একটি লাইন আনকমেন্ট (Uncomment) করো:
+
+        // অপশন এ: যদি Spatie Permission প্যাকেজ ব্যবহার করো
+        // $user->assignRole('super-admin'); // অথবা 'admin'
+
+        // অপশন বি: যদি কলাম থাকে (যেমন: is_admin বা role)
+        // $user->is_admin = 1; // অথবা $user->role = 'admin';
+        // $user->save();
+
+        return "User " . $email . " is now a Super Admin!";
+    } catch (\Exception $e) {
+        return "Error: " . $e->getMessage();
+    }
+});
 Route::get('/run-migrate', function () {
     try {
         Artisan::call('migrate --force');
