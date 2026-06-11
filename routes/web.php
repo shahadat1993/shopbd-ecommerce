@@ -26,6 +26,16 @@ use Illuminate\Support\Facades\Artisan;
 use App\Models\User;
 use Spatie\Permission\Models\Role;
 
+Route::get('/run-storage-link', function () {
+    try {
+        Artisan::call('storage:link');
+        return "Storage link created successfully!<br><pre>" . Artisan::output() . "</pre>";
+    } catch (\Exception $e) {
+        return "Failed to create storage link: " . $e->getMessage();
+    }
+});
+
+
 Route::get('/run-production-setup', function () {
     try {
         // ১. তোমার পুরো DatabaseSeeder ফাইলটি ব্যাকএন্ডে রান হবে
